@@ -5,9 +5,6 @@ const User = db.User;
 
 exports.register = async (req, res) => {
   try {
-    // Paksa Sequelize memastikan tabel dibuat di Supabase sebelum Insert data
-    await db.sequelize.sync();
-
     const { email, password } = req.body;
 
     if (!email || !password) {
