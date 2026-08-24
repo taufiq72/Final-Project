@@ -1,3 +1,5 @@
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'; // <-- TAMBAHKAN DI BARIS 1
+
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
@@ -9,7 +11,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Route root untuk tes kesehatan API di browser
 app.get('/', (req, res) => {
   res.json({
     message: 'IPGuard SaaS API status ONLINE',
@@ -17,7 +18,6 @@ app.get('/', (req, res) => {
   });
 });
 
-// Mounting router utama
 app.use('/api', routes);
 
 const PORT = process.env.PORT || 3000;
