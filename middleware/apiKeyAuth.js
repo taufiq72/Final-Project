@@ -1,30 +1,24 @@
-const crypto = require('crypto');
 const db = require('../models');
 const ApiKey = db.ApiKey;
 
-exports.generateKey = async (req, res) => {
+// Middleware untuk memvalidasi API Key yang dikirim lewat header 'x-api-key'.
+// Dipakai untuk melindungi endpoint yang diakses oleh klien eksternal (bukan user login biasa).
+exports.verifyApiKey = async (req, res, next) => {
   try {
-    // Paksa ambil ID dari req.user mau itu id, userId, atau sub
-    const targetUserId = req.user.id || req.user.userId || req.user.sub;
+    const apiKey = req.headers['x-api-key'];
 
-    if (!targetUserId) {
-      return res.status(400).json({ error: 'User ID missing in token payload' });
+    if (!apiKey) {
+      return res.status(401).json({ error: 'API key required' });
     }
 
-    const newApiKey = 'ipg_live_' + crypto.randomBytes(16).toString('hex');
+    const record = await ApiKey.findOne({ where: { api_key: apiKey } });
 
-    // Simpan ke database (mencakup semua penamaan field di Sequelize)
-    const apiKeyRecord = await ApiKey.create({
-      key: newApiKey,
-      UserId: targetUserId,
-      userId: targetUserId,
-      user_id: targetUserId
-    });
+    if (!record) {
+      return res.status(403).json({ error: 'Invalid API key' });
+    }
 
-    return res.status(201).json({
-      message: 'API Key generated successfully',
-      apiKey: apiKeyRecord.key
-    });
+    req.apiKeyOwnerId = record.user_id;
+    next();
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }

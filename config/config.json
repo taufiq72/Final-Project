@@ -5,7 +5,8 @@
     "database": "ipguard",
     "host": "127.0.0.1",
     "port": 5432,
-    "dialect": "postgres"
+    "dialect": "postgres",
+    "_comment": "Do not commit real credentials. Use config/config.js (reads from .env) for actual runtime config; sequelize-cli only reads this file directly for migrations."
   },
   "production": {
     "use_env_variable": "DATABASE_URL",
