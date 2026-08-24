@@ -1,25 +1,20 @@
 require('dotenv').config();
-const pg = require('pg'); // <-- 1. Import pg secara eksplisit
+const pg = require('pg');
 
 module.exports = {
   development: {
-    username: process.env.DB_USER,
-    password: process.env.DB_PASS,
-    database: process.env.DB_DATABASE,
-    host: process.env.DB_HOST,
+    username: process.env.DB_USER || 'postgres',
+    password: process.env.DB_PASS || 'postgres',
+    database: process.env.DB_DATABASE || 'database_development',
+    host: process.env.DB_HOST || '127.0.0.1',
     port: process.env.DB_PORT || 5432,
-    dialect: process.env.DB_DIALECT || 'postgres',
-    logging: console.log
+    dialect: 'postgres'
   },
   production: {
-    username: process.env.DB_USER,
-    password: process.env.DB_PASS,
-    database: process.env.DB_DATABASE,
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT || 5432,
-    dialect: process.env.DB_DIALECT || 'postgres',
-    dialectModule: pg, // <-- 2. Paksa Sequelize memakai modul pg ini!
-    logging: false,
+    use_env_variable: 'POSTGRES_URL',
+    url: process.env.POSTGRES_URL,
+    dialect: 'postgres',
+    dialectModule: pg,
     dialectOptions: {
       ssl: {
         require: true,

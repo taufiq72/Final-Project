@@ -3,27 +3,31 @@ const path = require('path');
 const Sequelize = require('sequelize');
 const process = require('process');
 const basename = path.basename(__filename);
+const pg = require('pg');
 
-// MEMAKSA ENVIRONMENT KE 'production' JIKA DI VERCEL
-const env = process.env.VERCEL || process.env.NODE_ENV === 'production' ? 'production' : 'development';
-
+const env = process.env.NODE_ENV === 'production' || process.env.VERCEL ? 'production' : 'development';
 const config = require(__dirname + '/../config/config.js')[env];
 const db = {};
 
 let sequelize;
-if (config.use_env_variable) {
-  sequelize = new Sequelize(process.env[config.use_env_variable], config);
-} else {
-  // Menggunakan dialectModule pg secara langsung
-  sequelize = new Sequelize(
-    config.database, 
-    config.username, 
-    config.password, 
-    {
-      ...config,
-      dialectModule: require('pg')
+if (config.use_env_variable && process.env[config.use_env_variable]) {
+  sequelize = new Sequelize(process.env[config.use_env_variable], {
+    dialect: 'postgres',
+    dialectModule: pg,
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false
+      }
     }
-  );
+  });
+} else if (config.url) {
+  sequelize = new Sequelize(config.url, config);
+} else {
+  sequelize = new Sequelize(config.database, config.username, config.password, {
+    ...config,
+    dialectModule: pg
+  });
 }
 
 fs.readdirSync(__dirname)
