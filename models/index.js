@@ -9,25 +9,31 @@ const env = process.env.NODE_ENV === 'production' || process.env.VERCEL ? 'produ
 const config = require(__dirname + '/../config/config.js')[env];
 const db = {};
 
-let sequelize;
-if (config.use_env_variable && process.env[config.use_env_variable]) {
-  sequelize = new Sequelize(process.env[config.use_env_variable], {
-    dialect: 'postgres',
-    dialectModule: pg,
-    dialectOptions: {
-      ssl: {
-        require: true,
-        rejectUnauthorized: false
-      }
+// Opsi SSL Wajib untuk Supabase PostgreSQL di Cloud/Vercel
+const sslOptions = {
+  dialect: 'postgres',
+  dialectModule: pg,
+  dialectOptions: {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false // Mengabaikan verifikasi self-signed certificate
     }
-  });
-} else if (config.url) {
-  sequelize = new Sequelize(config.url, config);
+  }
+};
+
+let sequelize;
+if (env === 'production') {
+  const dbUrl = process.env.POSTGRES_URL || process.env.DATABASE_URL;
+  if (dbUrl) {
+    sequelize = new Sequelize(dbUrl, sslOptions);
+  } else {
+    sequelize = new Sequelize(config.database, config.username, config.password, {
+      ...config,
+      ...sslOptions
+    });
+  }
 } else {
-  sequelize = new Sequelize(config.database, config.username, config.password, {
-    ...config,
-    dialectModule: pg
-  });
+  sequelize = new Sequelize(config.database, config.username, config.password, config);
 }
 
 fs.readdirSync(__dirname)
