@@ -4,18 +4,12 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 
-const db = require('./models'); // <-- Import models
 const routes = require('./routes');
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
-
-// Auto create/sync tabel ke Supabase
-db.sequelize.sync({ alter: true })
-  .then(() => console.log('Database synced successfully'))
-  .catch((err) => console.error('Failed to sync database:', err));
 
 app.get('/', (req, res) => {
   res.json({

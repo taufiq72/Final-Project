@@ -7,7 +7,6 @@ const pg = require('pg');
 
 const db = {};
 
-// Paksa penanganan SSL untuk Supabase / Vercel
 const dialectOptions = {
   ssl: {
     require: true,
@@ -17,7 +16,6 @@ const dialectOptions = {
 
 let sequelize;
 
-// Cek apakah ada POSTGRES_URL (Vercel)
 if (process.env.POSTGRES_URL) {
   sequelize = new Sequelize(process.env.POSTGRES_URL, {
     dialect: 'postgres',
@@ -26,7 +24,6 @@ if (process.env.POSTGRES_URL) {
     logging: false
   });
 } else {
-  // Fallback ke variabel individu
   sequelize = new Sequelize(
     process.env.DB_DATABASE || 'postgres',
     process.env.DB_USER || 'postgres',
