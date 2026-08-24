@@ -1,19 +1,28 @@
-const { ApiKey } = require('../models');
+const crypto = require('crypto');
+const db = require('../models');
+const ApiKey = db.ApiKey;
 
-module.exports = async (req, res, next) => {
-  const apiKey = req.headers['x-api-key'];
-  if (!apiKey) {
-    return res.status(401).json({ error: 'Header X-API-KEY wajib disertakan' });
-  }
-
+exports.generateKey = async (req, res) => {
   try {
-    const foundKey = await ApiKey.findOne({ where: { api_key: apiKey } });
-    if (!foundKey) {
-      return res.status(403).json({ error: 'X-API-KEY tidak valid' });
+    // Ambil ID dari req.user yang di-pass middleware
+    const userId = req.user ? (req.user.id || req.user.userId) : null;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized: User authentication payload missing' });
     }
-    req.apiKeyData = foundKey;
-    next();
-  } catch (err) {
-    return res.status(500).json({ error: err.message });
+
+    const newApiKey = 'ipg_live_' + crypto.randomBytes(16).toString('hex');
+
+    const apiKeyRecord = await ApiKey.create({
+      key: newApiKey,
+      UserId: userId
+    });
+
+    res.status(201).json({
+      message: 'API Key generated successfully',
+      apiKey: apiKeyRecord.key
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 };
