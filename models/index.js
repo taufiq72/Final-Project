@@ -5,35 +5,41 @@ const process = require('process');
 const basename = path.basename(__filename);
 const pg = require('pg');
 
-const env = process.env.NODE_ENV === 'production' || process.env.VERCEL ? 'production' : 'development';
-const config = require(__dirname + '/../config/config.js')[env];
 const db = {};
 
-// Opsi SSL Wajib untuk Supabase PostgreSQL di Cloud/Vercel
-const sslOptions = {
-  dialect: 'postgres',
-  dialectModule: pg,
-  dialectOptions: {
-    ssl: {
-      require: true,
-      rejectUnauthorized: false // Mengabaikan verifikasi self-signed certificate
-    }
+// Paksa penanganan SSL untuk Supabase / Vercel
+const dialectOptions = {
+  ssl: {
+    require: true,
+    rejectUnauthorized: false
   }
 };
 
 let sequelize;
-if (env === 'production') {
-  const dbUrl = process.env.POSTGRES_URL || process.env.DATABASE_URL;
-  if (dbUrl) {
-    sequelize = new Sequelize(dbUrl, sslOptions);
-  } else {
-    sequelize = new Sequelize(config.database, config.username, config.password, {
-      ...config,
-      ...sslOptions
-    });
-  }
+
+// Cek apakah ada POSTGRES_URL (Vercel)
+if (process.env.POSTGRES_URL) {
+  sequelize = new Sequelize(process.env.POSTGRES_URL, {
+    dialect: 'postgres',
+    dialectModule: pg,
+    dialectOptions: dialectOptions,
+    logging: false
+  });
 } else {
-  sequelize = new Sequelize(config.database, config.username, config.password, config);
+  // Fallback ke variabel individu
+  sequelize = new Sequelize(
+    process.env.DB_DATABASE || 'postgres',
+    process.env.DB_USER || 'postgres',
+    process.env.DB_PASS || '',
+    {
+      host: process.env.DB_HOST || '127.0.0.1',
+      port: process.env.DB_PORT || 5432,
+      dialect: 'postgres',
+      dialectModule: pg,
+      dialectOptions: process.env.NODE_ENV === 'production' ? dialectOptions : {},
+      logging: false
+    }
+  );
 }
 
 fs.readdirSync(__dirname)
