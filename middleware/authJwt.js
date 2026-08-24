@@ -10,15 +10,7 @@ exports.verifyToken = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secretkey');
-    
-    // Simpan payload decoded ke req.user
     req.user = decoded;
-    
-    // Tambahkan fallback jika struktur id tersimpan dalam format berbeda
-    if (!req.user.id && req.user.userId) {
-      req.user.id = req.user.userId;
-    }
-
     next();
   } catch (error) {
     return res.status(403).json({ error: 'Invalid or expired token' });
