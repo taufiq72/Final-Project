@@ -21,10 +21,10 @@ module.exports = {
     dialectModule: pg, // <-- 2. Paksa Sequelize memakai modul pg ini!
     logging: false,
     dialectOptions: {
-    ssl: {
-    require: true,
-    rejectUnauthorized: false
-  }
-}
+      ssl: {
+        require: true,
+        rejectUnauthorized: false
+      }
+    }
   }
 };

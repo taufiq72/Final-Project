@@ -3,9 +3,10 @@ const path = require('path');
 const Sequelize = require('sequelize');
 const process = require('process');
 const basename = path.basename(__filename);
-const env = process.env.NODE_ENV || 'development';
 
-// Membaca konfigurasi dari config/config.js
+// MEMAKSA ENVIRONMENT KE 'production' JIKA DI VERCEL
+const env = process.env.VERCEL || process.env.NODE_ENV === 'production' ? 'production' : 'development';
+
 const config = require(__dirname + '/../config/config.js')[env];
 const db = {};
 
@@ -13,10 +14,18 @@ let sequelize;
 if (config.use_env_variable) {
   sequelize = new Sequelize(process.env[config.use_env_variable], config);
 } else {
-  sequelize = new Sequelize(config.database, config.username, config.password, config);
+  // Menggunakan dialectModule pg secara langsung
+  sequelize = new Sequelize(
+    config.database, 
+    config.username, 
+    config.password, 
+    {
+      ...config,
+      dialectModule: require('pg')
+    }
+  );
 }
 
-// PERBAIKAN DI SINI: Gunakan __dirname, BUKAN __filename
 fs.readdirSync(__dirname)
   .filter(file => {
     return (
