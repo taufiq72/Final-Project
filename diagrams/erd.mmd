@@ -1,0 +1,35 @@
+erDiagram
+    USER ||--o{ APIKEY : "memiliki"
+    IPINTELLIGENCE ||--o{ THREATLOG : "memiliki riwayat"
+
+    USER {
+        uuid id PK
+        string email UK
+        text password
+    }
+
+    APIKEY {
+        uuid id PK
+        uuid user_id FK
+        string api_key UK
+        timestamp created_at
+    }
+
+    IPINTELLIGENCE {
+        string ip_address PK
+        string country
+        string city
+        string isp
+        integer risk_score
+        boolean is_vpn
+        boolean is_tor
+    }
+
+    THREATLOG {
+        uuid id PK
+        string ip_address FK
+        string threat_type
+        text description
+        datetime created_at
+        datetime updated_at
+    }

@@ -1,0 +1,32 @@
+flowchart LR
+    KlienAPI(["Klien API - Developer/Konsumen SaaS"])
+    Admin(["Admin - Pemilik data"])
+
+    subgraph Sistem["Sistem IPGuard API"]
+        UC1(("Registrasi Akun"))
+        UC2(("Login - dapat JWT"))
+        UC3(("Generate API Key"))
+        UC4(("Lihat semua data IP"))
+        UC5(("Lihat detail 1 IP + riwayat"))
+        UC6(("Tambah data IP"))
+        UC7(("Perbarui data IP"))
+        UC8(("Hapus data IP"))
+        UC9{{"include - Validasi API Key"}}
+    end
+
+    KlienAPI --> UC1
+    KlienAPI --> UC2
+    KlienAPI --> UC3
+    KlienAPI --> UC4
+    KlienAPI --> UC5
+
+    Admin --> UC4
+    Admin --> UC6
+    Admin --> UC7
+    Admin --> UC8
+
+    UC4 -.-> UC9
+    UC5 -.-> UC9
+    UC6 -.-> UC9
+    UC7 -.-> UC9
+    UC8 -.-> UC9

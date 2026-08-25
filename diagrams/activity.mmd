@@ -1,0 +1,16 @@
+flowchart TD
+    Start((Mulai)) --> Register["POST /api/auth/register"]
+    Register --> D1{Email sudah terdaftar?}
+    D1 -- Ya --> E1["400 - Email sudah terdaftar"]
+    D1 -- Tidak --> Hash["Hash password bcrypt - Simpan user baru ke DB"]
+    Hash --> Login["POST /api/auth/login"]
+    Login --> D2{Email and password valid?}
+    D2 -- Tidak --> E2["401 - Login gagal"]
+    D2 -- Ya --> JWT["Generate JWT token - Response 200 + token"]
+    JWT --> GenKey["POST /api/keys/generate - Bearer JWT"]
+    GenKey --> SaveKey["Buat api_key acak - Simpan terhubung ke user_id"]
+    SaveKey --> GetIP["GET /api/ip - header x-api-key"]
+    GetIP --> D3{API key valid?}
+    D3 -- Tidak --> E3["401/403 - API key tidak valid"]
+    D3 -- Ya --> Success["200 - Kembalikan data IP intelligence"]
+    Success --> End((Selesai))
